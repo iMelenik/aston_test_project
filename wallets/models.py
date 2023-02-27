@@ -9,8 +9,8 @@ class Wallet(models.Model):
     objects = models.Manager()
 
     name = models.CharField(unique=True, null=True, blank=True, max_length=8)
-    type = models.CharField(choices=['Visa', 'Mastercard'], default='Visa')
-    currency = models.CharField(choices=['USD', 'EUR', 'RUB'], default='RUB')
+    type = models.CharField(choices=('Visa', 'Mastercard'), default='Visa')
+    currency = models.CharField(choices=('USD', 'EUR', 'RUB'), default='RUB')
     balance = models.DecimalField(decimal_places=2)
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
@@ -24,7 +24,7 @@ class Wallet(models.Model):
             self.__unique_wallet_name_generate()
         super().save(*args, **kwargs)
 
-    def __unique_wallet_name_generate(self):
+    def __unique_wallet_name_generate(self) -> None:
         """generate unique random 8 symbols of latin alphabet and digits. Example: MO72RTX3"""
         name = choices([ascii_uppercase, digits], k=8)
         try:
