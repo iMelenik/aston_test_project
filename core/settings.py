@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'wallets.apps.WalletsConfig',
     'transactions.apps.TransactionsConfig',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
