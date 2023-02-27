@@ -19,10 +19,10 @@ class UserRegister:
 
 
 class UserDetail(generics.RetrieveAPIView):
-    queryset = UserProfile.objects.all()
+    queryset = UserProfile.objects.all().select_related('user')
     serializer_class = UserProfileSerializer
 
 
 class UserList(generics.ListAPIView):
-    queryset = UserProfile.objects.all()
+    queryset = UserProfile.objects.all().select_related('user')
     serializer_class = UserProfileSerializer
