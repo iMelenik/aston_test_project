@@ -40,7 +40,7 @@ class Wallet(models.Model):
 
     def __unique_wallet_name_generate(self) -> None:
         """generate unique random 8 symbols of latin alphabet and digits. Example: MO72RTX3"""
-        name = choices([ascii_uppercase, digits], k=8)
+        name = ''.join(choices(ascii_uppercase + digits, k=8))
         try:
             Wallet.objects.get(name=name)
         except Wallet.DoesNotExist:
