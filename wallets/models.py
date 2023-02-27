@@ -28,3 +28,21 @@ class Wallet(models.Model):
 
     def __str__(self):
         return f"Кошелек {self.type} с валютой {self.currency}."
+
+    def get_sender_transactions(self):
+        qs = self.trans_sender.all()
+        if qs.exists():
+            return qs
+        # return "С данного кошелька ни разу не отправляли деньги."
+
+    def get_receiver_transactions(self):
+        qs = self.trans_receiver.all()
+        if qs.exists():
+            return qs
+        # return "На данный кошелек ни разу не отправляли деньги."
+
+    def get_all_wallet_transactions(self):
+        qs = self.get_sender_transactions() | self.get_receiver_transactions()
+        if qs.exists():
+            return qs
+        # return "С данным кошельком не выполнялось никаких операций."
