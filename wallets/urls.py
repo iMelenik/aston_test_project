@@ -12,8 +12,6 @@ wallet_list = WalletViewSet.as_view({
 
 wallet_detail = WalletViewSet.as_view({
     'get': 'retrieve',
-    'put': 'update',
-    'patch': 'partial_update',
     'delete': 'destroy'
 })
 
