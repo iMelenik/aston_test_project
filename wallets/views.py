@@ -24,6 +24,7 @@ class WalletViewSet(viewsets.ModelViewSet):
     serializer_class = WalletSerializer
     http_method_names = ['get', 'post', 'delete']
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    lookup_field = 'name'
 
     def perform_create(self, serializer):
         """

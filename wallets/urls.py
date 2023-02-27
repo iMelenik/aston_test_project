@@ -1,7 +1,9 @@
 from django.urls import path
 
-app_name = 'wallets'
 from .views import *
+
+
+app_name = 'wallets'
 
 wallet_list = WalletViewSet.as_view({
     'get': 'list',
@@ -17,5 +19,5 @@ wallet_detail = WalletViewSet.as_view({
 
 urlpatterns = [
     path('', wallet_list, name='list'),
-    path('<int:pk>/', wallet_detail, name='detail')
+    path('<slug:name>/', wallet_detail, name='detail')
 ]
