@@ -13,12 +13,9 @@ from .serializers import WalletSerializer
 # Create your views here.
 class WalletViewSet(viewsets.ModelViewSet):
     """
-    У пользователя не более 5 кошельков
-    Для создания POST только type и currency
+    Доделать:
     Для чтения GET только свои кошельки?
-    Для удаления DELETE только свой кошелек
-
-    PUT PATCH NOT ALLOWED
+    Для удаления DELETE только свой кошелек?
     """
     queryset = Wallet.objects.all()
     serializer_class = WalletSerializer

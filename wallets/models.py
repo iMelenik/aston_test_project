@@ -27,4 +27,4 @@ class Wallet(models.Model):
     modified_on = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Кошелек {self.name} с валютой {self.currency}."
+        return f"Кошелек {self.type} с валютой {self.currency}."
