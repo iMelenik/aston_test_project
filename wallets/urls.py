@@ -16,6 +16,6 @@ wallet_detail = WalletViewSet.as_view({
 })
 
 urlpatterns = [
-    path('list/', wallet_list, name='list'),
+    path('', wallet_list, name='list'),
     path('<int:pk>/', wallet_detail, name='detail')
 ]
