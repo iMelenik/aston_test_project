@@ -1,3 +1,6 @@
+from random import choices
+from string import ascii_uppercase, digits
+
 from django.db import models
 
 
@@ -16,12 +19,19 @@ class Wallet(models.Model):
         return f"Кошелек {self.name} с валютой {self.currency}."
 
     def save(self, *args, **kwargs):
+        """generates name on creation"""
         if not self.name:
-            self.unique_wallet_name_generate()
+            self.__unique_wallet_name_generate()
         super().save(*args, **kwargs)
 
-    @staticmethod
-    def unique_wallet_name_generate():
+    def __unique_wallet_name_generate(self):
         """generate unique random 8 symbols of latin alphabet and digits. Example: MO72RTX3"""
-        pass
+        name = choices([ascii_uppercase, digits], k=8)
+        try:
+            Wallet.objects.get(name=name)
+        except Wallet.DoesNotExist:
+            self.name = name
+        else:
+            self.__unique_wallet_name_generate()
+
 
