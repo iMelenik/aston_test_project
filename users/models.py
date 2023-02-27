@@ -13,10 +13,10 @@ class UserProfile(models.Model):
         return self.user.username
 
     def get_all_user_wallets(self):
-        qs = self.wallet_set.all()
+        qs = self.wallet.all()
         if qs.exists():
             return qs
         return "У данного пользователя не создано ни одного кошелька."
 
     def get_wallets_number(self):
-        return self.wallet_set.count()
+        return self.wallet.count()

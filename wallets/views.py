@@ -2,7 +2,10 @@ from random import choices
 from string import ascii_uppercase, digits
 
 from django.shortcuts import render
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status, serializers
+from rest_framework.exceptions import ParseError
+
+from users.models import UserProfile
 from .models import Wallet
 from .serializers import WalletSerializer
 
@@ -22,19 +25,22 @@ class WalletViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'delete']
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    # def perform_create(self, serializer):
-    #     """
-    #     generates unique name on creation;
-    #     checks that user don't have more than 5 wallets;
-    #     sets bonus from bank (if wallet currency USD or EUR - balance=3.00, if RUB - balance=100.00);
-    #     """
-    #     if not self.name:
-    #         name = self.__unique_wallet_name_generator()
-    #     user = self.request.user
-    #
-    #     serializer.save(
-    #         name=user,
-    #     )
+    def perform_create(self, serializer):
+        """
+        generates unique name on creation;
+        checks that user don't have more than 5 wallets;
+        sets bonus from bank (if wallet currency USD or EUR - balance=3.00, if RUB - balance=100.00);
+        """
+        user = UserProfile.objects.get(user=self.request.user)
+        if user.get_wallets_number() < 5:
+            name = self.__unique_wallet_name_generator()
+            balance = 100 if serializer.validated_data['currency'] == 'RUB' else 3
+            serializer.save(
+                name=name,
+                user=user,
+                balance=balance
+            )
+        raise serializers.ValidationError("Only 5 wallets are allowed.")
 
     def __unique_wallet_name_generator(self) -> str:
         """generate unique random 8 symbols of latin alphabet and digits. Example: MO72RTX3"""
