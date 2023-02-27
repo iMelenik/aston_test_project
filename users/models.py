@@ -1,8 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-from wallets.models import Wallet
-
 
 # Create your models here.
 

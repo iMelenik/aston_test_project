@@ -8,13 +8,24 @@ from users.models import UserProfile
 
 # Create your models here.
 class Wallet(models.Model):
+    TYPES_CHOICES = [
+        ('VISA', 'Visa'),
+        ('MC', 'Mastercard')
+    ]
+
+    CURRENCY_CHOICES = [
+        ('USD', 'USD'),
+        ('EUR', 'EUR'),
+        ('RUB', 'RUB'),
+    ]
+
     objects = models.Manager()
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='wallet')
 
     name = models.CharField(unique=True, null=True, blank=True, max_length=8, editable=False)
-    type = models.CharField(choices=('Visa', 'Mastercard'), default='Visa')
-    currency = models.CharField(choices=('USD', 'EUR', 'RUB'), default='RUB')
-    balance = models.DecimalField(decimal_places=2)
+    type = models.CharField(choices=TYPES_CHOICES, max_length=10)
+    currency = models.CharField(choices=CURRENCY_CHOICES, max_length=3)
+    balance = models.DecimalField(decimal_places=2, max_digits=15)
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
 
