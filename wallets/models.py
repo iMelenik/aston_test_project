@@ -3,12 +3,15 @@ from string import ascii_uppercase, digits
 
 from django.db import models
 
+from users.models import UserProfile
+
 
 # Create your models here.
 class Wallet(models.Model):
     objects = models.Manager()
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='wallet')
 
-    name = models.CharField(unique=True, null=True, blank=True, max_length=8)
+    name = models.CharField(unique=True, null=True, blank=True, max_length=8, editable=False)
     type = models.CharField(choices=('Visa', 'Mastercard'), default='Visa')
     currency = models.CharField(choices=('USD', 'EUR', 'RUB'), default='RUB')
     balance = models.DecimalField(decimal_places=2)
