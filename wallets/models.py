@@ -10,8 +10,8 @@ from users.models import UserProfile
 # Create your models here.
 class Wallet(models.Model):
     TYPES_CHOICES = [
-        ('VISA', 'Visa'),
-        ('MC', 'Mastercard')
+        ('Vise', 'VS'),
+        ('Mastercard', 'MC')
     ]
 
     CURRENCY_CHOICES = [

@@ -1,11 +1,13 @@
 from decimal import Decimal
 
+from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, generics, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from transactions.models import Transaction
+from transactions.permissions import TransactionOwner
 from transactions.serializers import TransactionSerializer
 from users.models import UserProfile
 from wallets.models import Wallet
@@ -13,16 +15,19 @@ from wallets.models import Wallet
 
 class TransactionListView(generics.ListCreateAPIView):
     """
-    create new and get list of current user's transactions
+    create new transaction and get list of current user's transactions
     """
     serializer_class = TransactionSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
+        """
+        return queryset of current user transactions
+        """
         user = UserProfile.objects.get(user=self.request.user)
         return Transaction.get_all_user_transactions(user)
 
-    def perform_create(self, serializer):
+    def perform_create(self, serializer) -> None:
         """
         set commission: 0% if both wallets belong to one user, else 10%
         """
@@ -38,17 +43,21 @@ class TransactionListView(generics.ListCreateAPIView):
 
 class TransactionDetailView(generics.RetrieveAPIView):
     """
-    retrieve transaction by id
+    retrieve single transaction by id
     """
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
+    permission_classes = [TransactionOwner]
 
 
 class TransactionWalletView(APIView):
     """
     retrieve all transactions for current wallet
     """
-    def get_wallet(self, name):
+    permission_classes = [TransactionOwner]
+
+    def get_wallet(self, name: str) -> Wallet:
+        """get wallet obj from name"""
         wallet = get_object_or_404(Wallet, name=name)
         return wallet
 

@@ -5,17 +5,13 @@ from .models import Transaction
 
 
 class TransactionSerializer(serializers.ModelSerializer):
-    sender = serializers.StringRelatedField()
-    receiver = serializers.StringRelatedField()
+    sender = serializers.SlugRelatedField(slug_field='name', queryset=Wallet.objects.all())
+    receiver = serializers.SlugRelatedField(slug_field='name', queryset=Wallet.objects.all())
 
     class Meta:
         model = Transaction
         fields = ['id', 'sender', 'receiver', 'transfer_amount', 'commission', 'status', 'timestamp']
         read_only_fields = ['status']
-        # lookup_field = 'name'
-        # extra_kwargs = {
-        #     'url': {'lookup_field': 'name'}
-        # }
 
     def validate(self, data):
         sender = data.get('sender')
@@ -35,7 +31,7 @@ class TransactionSerializer(serializers.ModelSerializer):
     @staticmethod
     def sender_receiver_currency_validator(sender: Wallet, receiver: Wallet) -> None:
         """
-        checks if wallets are the same currency
+        checks if both wallets are same currency
         """
         if sender.currency != receiver.currency:
             raise serializers.ValidationError(f"Wallets have different currency. "
