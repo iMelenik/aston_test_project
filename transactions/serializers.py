@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from rest_framework import serializers
 
 from wallets.models import Wallet
@@ -18,6 +20,8 @@ class TransactionSerializer(serializers.ModelSerializer):
         receiver = data.get('receiver')
         self.same_sender_receiver_validator(sender, receiver)
         self.sender_receiver_currency_validator(sender, receiver)
+        commission = self.is_sender_have_enough(sender, receiver, data.get('transfer_amount'))
+        data['commission'] = commission
         return data
 
     @staticmethod
@@ -36,3 +40,18 @@ class TransactionSerializer(serializers.ModelSerializer):
         if sender.currency != receiver.currency:
             raise serializers.ValidationError(f"Wallets have different currency. "
                                               f"Receiver currency is {receiver.currency}.")
+
+    @staticmethod
+    def is_sender_have_enough(sender: Wallet, receiver: Wallet, amount: Decimal) -> Decimal:
+        """
+        checks if sender have enough balance for transaction, calculates commission
+        """
+        if sender.user == receiver.user:
+            commission = 0
+        else:
+            commission = amount * Decimal('0.1')
+
+        if (sender.balance - amount - commission) < Decimal(0):
+            raise serializers.ValidationError("Not enough money on wallet for transaction.")
+
+        return commission
