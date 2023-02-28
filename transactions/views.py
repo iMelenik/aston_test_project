@@ -1,10 +1,14 @@
 from decimal import Decimal
+
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, generics, permissions
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from transactions.models import Transaction
 from transactions.serializers import TransactionSerializer
 from users.models import UserProfile
+from wallets.models import Wallet
 
 
 class TransactionListView(generics.ListCreateAPIView):
@@ -44,5 +48,12 @@ class TransactionWalletView(APIView):
     """
     retrieve all transactions for current wallet
     """
+    def get_wallet(self, name):
+        wallet = get_object_or_404(Wallet, name=name)
+        return wallet
+
     def get(self, request, name):
-        pass
+        wallet = self.get_wallet(name)
+        qs = Transaction.get_all_wallet_transactions(wallet)
+        serializer = TransactionSerializer(qs, many=True)
+        return Response(serializer.data)

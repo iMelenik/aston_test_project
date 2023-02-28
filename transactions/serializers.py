@@ -5,8 +5,8 @@ from .models import Transaction
 
 
 class TransactionSerializer(serializers.ModelSerializer):
-    # sender = serializers.HyperlinkedIdentityField(view_name='wallets:detail', lookup_field='name')
-    # receiver = serializers.HyperlinkedIdentityField(view_name='wallets:detail', lookup_field='name')
+    sender = serializers.StringRelatedField()
+    receiver = serializers.StringRelatedField()
 
     class Meta:
         model = Transaction

@@ -15,18 +15,6 @@ class Transaction(models.Model):
     status = models.CharField(choices=[('PAID', 'P'), ('FAILED', 'F')], default='FAILED', max_length=6)
     timestamp = models.DateTimeField(auto_now_add=True)
 
-    # @staticmethod
-    # def get_sender_transactions(sender: Wallet) -> QuerySet:
-    #     qs = Transaction.objects.filter(sender=sender)
-    #     if qs.exists():
-    #         return qs
-    #
-    # @staticmethod
-    # def get_receiver_transactions(receiver: Wallet) -> QuerySet:
-    #     qs = Transaction.objects.filter(receiver=receiver)
-    #     if qs.exists():
-    #         return qs
-
     @staticmethod
     def get_all_wallet_transactions(wallet: Wallet) -> QuerySet:
         qs = Transaction.objects.filter(Q(sender=wallet) | Q(receiver=wallet))
