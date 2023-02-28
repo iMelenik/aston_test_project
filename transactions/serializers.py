@@ -8,9 +8,21 @@ class TransactionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Transaction
-        fields = ['id', 'name', 'user', 'type', 'currency', 'balance', 'created_on', 'modified_on']
-        read_only_fields = ['balance']
+        fields = ['id', 'sender', 'receiver', 'transfer_amount', 'commission', 'status', 'timestamp']
+        read_only_fields = ['status']
         # lookup_field = 'name'
         # extra_kwargs = {
         #     'url': {'lookup_field': 'name'}
         # }
+
+    def check_if_same_wallets(self):
+        """
+        checks if sender and receiver are the same
+        """
+        pass
+
+    def check_wallets_currency(self):
+        """
+        checks if wallets are the same currency
+        """
+        pass
