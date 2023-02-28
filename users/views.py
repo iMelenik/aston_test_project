@@ -49,11 +49,17 @@ class UserRegisterView(generics.CreateAPIView):
 
 
 class UserDetailView(generics.RetrieveAPIView):
+    """
+    Detail information about user
+    """
     queryset = UserProfile.objects.all().select_related('user')
     serializer_class = UserProfileSerializer
 
 
 class UserListView(generics.ListAPIView):
+    """
+    All user's info. Only for admin
+    """
     queryset = UserProfile.objects.all().select_related('user')
     serializer_class = UserProfileSerializer
     permission_classes = [permissions.IsAdminUser]
