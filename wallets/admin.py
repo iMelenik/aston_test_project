@@ -8,6 +8,7 @@ class WalletAdmin(admin.ModelAdmin):
     list_display = ['owner', 'name', 'type', 'balance', 'currency']
     list_display_links = ['name']
     search_fields = ['owner', 'name']
+    ordering = ['user', 'currency']
 
     @staticmethod
     def owner(obj):

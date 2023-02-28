@@ -1,6 +1,7 @@
 from decimal import Decimal
 
-from django.db.models import QuerySet
+from django.db import transaction
+from django.db.models import QuerySet, F
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions
 from rest_framework.response import Response
@@ -26,6 +27,26 @@ class TransactionListView(generics.ListCreateAPIView):
         """
         user = UserProfile.objects.get(user=self.request.user)
         return Transaction.get_all_user_transactions(user)
+
+    # @transaction.atomic
+    def perform_create(self, serializer):
+        """
+        update wallets balance and set transaction status True
+        """
+        transfer_amount = serializer.validated_data['transfer_amount']
+        commission = serializer.validated_data['commission']
+
+        sender = Wallet.objects.select_for_update().get(name=serializer.validated_data['sender'].name)
+        receiver = Wallet.objects.select_for_update().get(name=serializer.validated_data['receiver'].name)
+
+        with transaction.atomic():
+            sender.balance -= transfer_amount + commission
+            sender.save()
+
+            receiver.balance += transfer_amount
+            receiver.save()
+
+            serializer.save(status='PAID')
 
 
 class TransactionDetailView(generics.RetrieveAPIView):
