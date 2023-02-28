@@ -20,3 +20,6 @@ class UserProfile(models.Model):
 
     def get_wallets_number(self):
         return self.wallet.count()
+
+    def get_all_user_transactions(self):
+        pass

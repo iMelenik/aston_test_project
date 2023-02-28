@@ -27,7 +27,10 @@ class Wallet(models.Model):
     modified_on = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Кошелек {self.type} с валютой {self.currency}."
+        return f"{self.name} ({self.currency})"
+
+    def __repr__(self):
+        return f"Кошелек: {self.name}, тип: {self.type} валюта: {self.currency}, баланс: {self.currency}."
 
     def get_sender_transactions(self):
         qs = self.trans_sender.all()
