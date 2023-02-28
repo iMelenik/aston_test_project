@@ -2,6 +2,7 @@ from random import choices
 from string import ascii_uppercase, digits
 
 from django.db import models
+from django.db.models import QuerySet
 
 from users.models import UserProfile
 
@@ -35,24 +36,6 @@ class Wallet(models.Model):
     def __repr__(self):
         return f"Кошелек: {self.name}, тип: {self.type} валюта: {self.currency}, баланс: {self.currency}."
 
-    def get_sender_transactions(self):
-        qs = self.trans_sender.all()
-        if qs.exists():
-            return qs
-        # return "С данного кошелька ни разу не отправляли деньги."
-
-    def get_receiver_transactions(self):
-        qs = self.trans_receiver.all()
-        if qs.exists():
-            return qs
-        # return "На данный кошелек ни разу не отправляли деньги."
-
-    def get_all_wallet_transactions(self):
-        qs = self.get_sender_transactions() | self.get_receiver_transactions()
-        if qs.exists():
-            return qs
-        # return "С данным кошельком не выполнялось никаких операций."
-
     def save(self, *args, **kwargs):
         """
         generates unique name on creation;
@@ -70,3 +53,13 @@ class Wallet(models.Model):
             return name
         else:
             self.__unique_wallet_name_generator()
+
+    @staticmethod
+    def get_all_user_wallets(user: UserProfile) -> QuerySet:
+        qs = Wallet.objects.filter(user=user)
+        if qs.exists():
+            return qs
+
+    @staticmethod
+    def get_user_wallets_number(user: UserProfile) -> int:
+        return Wallet.objects.filter(user=user).count()

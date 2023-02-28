@@ -1,17 +1,22 @@
 from decimal import Decimal
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, permissions
 from rest_framework.views import APIView
 
 from transactions.models import Transaction
 from transactions.serializers import TransactionSerializer
+from users.models import UserProfile
 
 
 class TransactionListView(generics.ListCreateAPIView):
     """
     create new and get list of current user's transactions
     """
-    queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = UserProfile.objects.get(user=self.request.user)
+        return Transaction.get_all_user_transactions(user)
 
     def perform_create(self, serializer):
         """

@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import QuerySet, Q
 
 from wallets.models import Wallet
 
@@ -13,3 +14,27 @@ class Transaction(models.Model):
     commission = models.DecimalField(decimal_places=2, max_digits=15, null=True, blank=True, editable=False)
     status = models.CharField(choices=[('PAID', 'P'), ('FAILED', 'F')], default='FAILED', max_length=6)
     timestamp = models.DateTimeField(auto_now_add=True)
+
+    # @staticmethod
+    # def get_sender_transactions(sender: Wallet) -> QuerySet:
+    #     qs = Transaction.objects.filter(sender=sender)
+    #     if qs.exists():
+    #         return qs
+    #
+    # @staticmethod
+    # def get_receiver_transactions(receiver: Wallet) -> QuerySet:
+    #     qs = Transaction.objects.filter(receiver=receiver)
+    #     if qs.exists():
+    #         return qs
+
+    @staticmethod
+    def get_all_wallet_transactions(wallet: Wallet) -> QuerySet:
+        qs = Transaction.objects.filter(Q(sender=wallet) | Q(receiver=wallet))
+        if qs.exists():
+            return qs
+
+    @staticmethod
+    def get_all_user_transactions(user):
+        users_wallets = Wallet.get_all_user_wallets(user)
+        qs = Transaction.objects.filter(Q(sender__in=users_wallets) | Q(receiver__in=users_wallets))
+        return qs
