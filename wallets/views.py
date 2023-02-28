@@ -24,27 +24,17 @@ class WalletViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         """
-        generates unique name on creation;
         checks that user don't have more than 5 wallets;
         sets bonus from bank (if wallet currency USD or EUR - balance=3.00, if RUB - balance=100.00);
         """
         user = UserProfile.objects.get(user=self.request.user)
         if user.get_wallets_number() < 5:
-            name = self.__unique_wallet_name_generator()
             balance = 100 if serializer.validated_data['currency'] == 'RUB' else 3
             serializer.save(
-                name=name,
                 user=user,
                 balance=balance
             )
-        raise serializers.ValidationError("Only 5 wallets are allowed.")
-
-    def __unique_wallet_name_generator(self) -> str:
-        """generate unique random 8 symbols of latin alphabet and digits. Example: MO72RTX3"""
-        name = ''.join(choices(ascii_uppercase + digits, k=8))
-        try:
-            Wallet.objects.get(name=name)
-        except Wallet.DoesNotExist:
-            return name
         else:
-            self.__unique_wallet_name_generator()
+            raise serializers.ValidationError("Only 5 wallets are allowed.")
+
+

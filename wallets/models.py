@@ -1,3 +1,6 @@
+from random import choices
+from string import ascii_uppercase, digits
+
 from django.db import models
 
 from users.models import UserProfile
@@ -49,3 +52,21 @@ class Wallet(models.Model):
         if qs.exists():
             return qs
         # return "С данным кошельком не выполнялось никаких операций."
+
+    def save(self, *args, **kwargs):
+        """
+        generates unique name on creation;
+        """
+        if not self.name:
+            self.name = self.__unique_wallet_name_generator()
+        super().save(*args, **kwargs)
+
+    def __unique_wallet_name_generator(self) -> str:
+        """generate unique random 8 symbols of latin alphabet and digits. Example: MO72RTX3"""
+        name = ''.join(choices(ascii_uppercase + digits, k=8))
+        try:
+            Wallet.objects.get(name=name)
+        except Wallet.DoesNotExist:
+            return name
+        else:
+            self.__unique_wallet_name_generator()
