@@ -8,7 +8,7 @@ class TransactionOwner(permissions.BasePermission):
     """
     Custom permission to allow only transaction owner to read/edit it.
     """
-    def has_object_permission(self, request, view, obj: Transaction):
+    def has_object_permission(self, request, view, obj: Transaction) -> bool:
         auth_user = UserProfile.objects.get(user=request.user)
         sender_owner = obj.sender.user
         receiver_owner = obj.receiver.user

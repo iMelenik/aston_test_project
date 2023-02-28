@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import QuerySet, Q
 
+from users.models import UserProfile
 from wallets.models import Wallet
 
 
@@ -17,12 +18,18 @@ class Transaction(models.Model):
 
     @staticmethod
     def get_all_wallet_transactions(wallet: Wallet) -> QuerySet:
+        """
+        returns QuerySet of all transactions from current wallet
+        """
         qs = Transaction.objects.filter(Q(sender=wallet) | Q(receiver=wallet))
         if qs.exists():
             return qs
 
     @staticmethod
-    def get_all_user_transactions(user):
+    def get_all_user_transactions(user: UserProfile) -> QuerySet:
+        """
+        returns QuerySet of all transactions from current user
+        """
         users_wallets = Wallet.get_all_user_wallets(user)
         qs = Transaction.objects.filter(Q(sender__in=users_wallets) | Q(receiver__in=users_wallets))
         return qs

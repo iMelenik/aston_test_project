@@ -1,4 +1,4 @@
-
+from django.db.models import QuerySet
 from rest_framework import viewsets, permissions, status, serializers
 
 from users.models import UserProfile
@@ -13,16 +13,16 @@ class WalletViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     lookup_field = 'name'
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         """
-        Only user's wallets are seen
+        Only current user's wallets are seen
         """
         user = UserProfile.objects.get(user=self.request.user)
         return Wallet.get_all_user_wallets(user)
 
-    def perform_create(self, serializer):
+    def perform_create(self, serializer) -> None:
         """
-        checks that user don't have more than 5 wallets;
+        checks if user don't have more than 5 wallets and
         sets bonus from bank (if wallet currency USD or EUR - balance=3.00, if RUB - balance=100.00);
         """
         user = UserProfile.objects.get(user=self.request.user)

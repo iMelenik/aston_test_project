@@ -34,9 +34,9 @@ class Wallet(models.Model):
         return f"{self.name} ({self.currency})"
 
     def __repr__(self):
-        return f"Кошелек: {self.name}, тип: {self.type} валюта: {self.currency}, баланс: {self.currency}."
+        return f"Кошелек: {self.name}, тип: {self.type}, валюта: {self.currency}, баланс: {self.currency}."
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         """
         generates unique name on creation;
         """
@@ -45,7 +45,9 @@ class Wallet(models.Model):
         super().save(*args, **kwargs)
 
     def __unique_wallet_name_generator(self) -> str:
-        """generate unique random 8 symbols of latin alphabet and digits. Example: MO72RTX3"""
+        """
+        generate unique random 8 symbols of latin alphabet and digits. Example: MO72RTX3
+        """
         name = ''.join(choices(ascii_uppercase + digits, k=8))
         try:
             Wallet.objects.get(name=name)
@@ -56,10 +58,16 @@ class Wallet(models.Model):
 
     @staticmethod
     def get_all_user_wallets(user: UserProfile) -> QuerySet:
+        """
+        returns QuerySet of wallets for current user
+        """
         qs = Wallet.objects.filter(user=user)
         if qs.exists():
             return qs
 
     @staticmethod
     def get_user_wallets_number(user: UserProfile) -> int:
+        """
+        returns number of wallets for current user
+        """
         return Wallet.objects.filter(user=user).count()

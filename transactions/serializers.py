@@ -23,7 +23,7 @@ class TransactionSerializer(serializers.ModelSerializer):
     @staticmethod
     def same_sender_receiver_validator(sender: Wallet, receiver: Wallet) -> None:
         """
-        checks if sender and receiver are the same
+        checks if sender and receiver are not the same
         """
         if sender == receiver:
             raise serializers.ValidationError("You cant send and receive on the same wallet.")
