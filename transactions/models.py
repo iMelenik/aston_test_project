@@ -30,6 +30,5 @@ class Transaction(models.Model):
         """
         returns QuerySet of all transactions from current user
         """
-        users_wallets = Wallet.get_all_user_wallets(user)
-        qs = Transaction.objects.filter(Q(sender__in=users_wallets) | Q(receiver__in=users_wallets))
+        qs = Transaction.objects.filter(Q(sender__user=user) | Q(receiver__user=user))
         return qs
