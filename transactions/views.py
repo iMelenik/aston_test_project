@@ -1,14 +1,12 @@
-from decimal import Decimal
-
 from django.db import transaction
-from django.db.models import QuerySet, F
+from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from transactions.models import Transaction
-from transactions.permissions import TransactionOwner
+from transactions.permissions import IsTransactionOwner
 from transactions.serializers import TransactionSerializer
 from users.models import UserProfile
 from wallets.models import Wallet
@@ -36,10 +34,10 @@ class TransactionListView(generics.ListCreateAPIView):
         transfer_amount = serializer.validated_data['transfer_amount']
         commission = serializer.validated_data['commission']
 
-        sender = Wallet.objects.select_for_update().get(name=serializer.validated_data['sender'].name)
-        receiver = Wallet.objects.select_for_update().get(name=serializer.validated_data['receiver'].name)
-
         with transaction.atomic():
+            sender = Wallet.objects.select_for_update().get(name=serializer.validated_data['sender'].name)
+            receiver = Wallet.objects.select_for_update().get(name=serializer.validated_data['receiver'].name)
+
             sender.balance -= transfer_amount + commission
             sender.save()
 
@@ -55,14 +53,14 @@ class TransactionDetailView(generics.RetrieveAPIView):
     """
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
-    permission_classes = [TransactionOwner]
+    permission_classes = [IsTransactionOwner]
 
 
 class TransactionWalletView(APIView):
     """
     retrieve all transactions for current wallet
     """
-    permission_classes = [TransactionOwner]
+    permission_classes = [permissions.IsAuthenticated, IsTransactionOwner]
 
     def get_wallet(self, name: str) -> Wallet:
         """get wallet obj from name"""

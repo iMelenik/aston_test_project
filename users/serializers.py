@@ -11,7 +11,7 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email')
+        fields = ('username', 'email')
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -19,7 +19,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ('user',)
+        fields = ('id', 'user')
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -55,10 +55,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         """
         user = User.objects.create(
             username=validated_data['username'],
-            email=validated_data['email'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name']
+            email=validated_data['email']
         )
+        try:
+            user.first_name = validated_data['first_name'],
+            user.last_name = validated_data['last_name']
+        except KeyError:
+            pass
         user.set_password(validated_data['password'])
         user.save()
         UserProfile.objects.create(user=user)
