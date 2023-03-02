@@ -155,7 +155,8 @@ class UserViewsTestCase(APITestCase):
         GET: returns user by userprofile id
         POST: method not allowed
         """
-        url = reverse('users:detail', kwargs={'pk': '2'})
+        user_id = UserProfile.objects.get(user=self.simple_user).id
+        url = reverse('users:detail', kwargs={'pk': user_id})
 
         """unauthorized"""
         response = self.client.get(url, format='json')
@@ -171,4 +172,4 @@ class UserViewsTestCase(APITestCase):
 
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['id'], 2)
+        self.assertEqual(response.data['id'], user_id)

@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from transactions.models import Transaction
-from transactions.permissions import IsTransactionOwner
+from transactions.permissions import IsTransactionOwner, IsWalletOwner
 from transactions.serializers import TransactionSerializer
 from users.models import UserProfile
 from wallets.models import Wallet
@@ -53,14 +53,14 @@ class TransactionDetailView(generics.RetrieveAPIView):
     """
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
-    permission_classes = [IsTransactionOwner]
+    permission_classes = [permissions.IsAuthenticated, IsTransactionOwner]
 
 
 class TransactionWalletView(APIView):
     """
     retrieve all transactions for current wallet
     """
-    permission_classes = [permissions.IsAuthenticated, IsTransactionOwner]
+    permission_classes = [permissions.IsAuthenticated, IsWalletOwner]
 
     def get_wallet(self, name: str) -> Wallet:
         """get wallet obj from name"""
