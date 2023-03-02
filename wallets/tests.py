@@ -1,3 +1,4 @@
+from _decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
@@ -54,53 +55,63 @@ class WalletsUsageTestCase(APITestCase):
 class WalletViewsTestCase(APITestCase):
     def setUp(self) -> None:
         self.user1 = User.objects.create_user(
-            username='name',
-            password='pass',
-            email='tt@tt.ru',
+            username='name1',
+            password='pass1',
+            email='tt1@tt.ru',
         )
-        self.token_user = Token.objects.create(user=self.user1)
+        self.token_user1 = Token.objects.create(user=self.user1)
         UserProfile.objects.create(user=self.user1)
 
         self.user2 = User.objects.create_user(
-            username='name',
-            password='pass',
-            email='tt@tt.ru',
+            username='name2',
+            password='pass2',
+            email='tt2@tt.ru',
         )
-        self.token_user = Token.objects.create(user=self.user2)
+        self.token_user2 = Token.objects.create(user=self.user2)
         UserProfile.objects.create(user=self.user2)
 
-    # def test_wallets_list_view(self):
-    #     """
-    #     ALL: requires authentication, only owner
-    #     GET: returns list of all owners wallets
-    #     POST: method not allowed
-    #     """
-    #     url = reverse('wallets:list')
-    #     """unauthorized"""
-    #     response = self.client.post(url, format='json')
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #     response = self.client.get(url, format='json')
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #
-    #     """simple user"""
-    #     self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token_user.key)
-    #
-    #     response = self.client.get(url, format='json')
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    #     response = self.client.post(url, format='json')
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    #
-    #     def test_wallet_balance_calculation():
-    #         """Field "balance" calculates correctly"""
-    #         print(self.wallet.balance)
-    #
-    #     def test_wallet_number_allowed():
-    #         """Only 5 wallets allowed for 1 user"""
-    #         pass
-    #
-    #     test_wallet_balance_calculation()
-    #     test_wallet_number_allowed()
-    #
+    def test_wallets_list_view(self):
+        """
+        ALL: requires authentication, only owner
+        GET: returns list of all owners wallets
+        POST: create new wallet
+        """
+        url = reverse('wallets:list')
+        """unauthorized"""
+        response = self.client.post(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        """simple user"""
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token_user1.key)
+
+        """balance calculation check"""
+        for currency in ('USD', 'RUB', 'EUR'):
+            data = {
+                'type': 'Visa',
+                'currency': currency,
+            }
+            response = self.client.post(url, data, format='json')
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            self.assertEqual(Decimal(response.data['balance']),
+                             3 if response.data['currency'] in ('EUR', 'USD') else 100)
+
+        """max number of wallets check"""
+        for i in range(6):
+            data = {
+                'type': 'Visa',
+                'currency': 'RUB',
+            }
+            self.client.post(url, data, format='json')
+
+        self.assertEqual(Wallet.objects.count(), 5)
+
+        """only owner permission check"""
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token_user2.key)
+        response = self.client.get(url, format='json')
+        self.assertEqual(len(response.data), 0)
+
     # def test_wallet_detail_view(self):
     #     """
     #     ALL: requires authentication, only owner
