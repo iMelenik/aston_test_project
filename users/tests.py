@@ -9,7 +9,7 @@ from users.models import UserProfile
 User = get_user_model()
 
 
-class UserTestCase(APITestCase):
+class UserUsageTestCase(APITestCase):
     def test_registration(self):
         """
         GET: method not allowed
@@ -71,11 +71,13 @@ class UserTestCase(APITestCase):
         """
         url = reverse('users:logout')
 
+        """unauthorized"""
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         response = self.client.post(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+        """simple user"""
         user = User.objects.create_user(
             username='name',
             password='pass',
@@ -93,3 +95,80 @@ class UserTestCase(APITestCase):
 
         with self.assertRaises(Token.DoesNotExist):
             Token.objects.get(user=user)
+
+
+class UserViewsTestCase(APITestCase):
+
+    def setUp(self) -> None:
+        self.simple_user = User.objects.create_user(
+            username='name',
+            password='pass',
+            email='tt@tt.ru',
+        )
+        self.token_user = Token.objects.create(user=self.simple_user)
+        UserProfile.objects.create(user=self.simple_user)
+
+        self.admin = User.objects.create_user(
+            username='admin',
+            password='admin',
+            email='admin@tt.ru',
+        )
+        self.admin.is_staff = True
+        self.admin.save()
+        self.token_admin = Token.objects.create(user=self.admin)
+        UserProfile.objects.create(user=self.admin)
+
+    def test_user_list_view(self):
+        """
+        ALL: requires authentication, only admin permission
+        GET: returns list of all users
+        POST: method not allowed
+        """
+        url = reverse('users:list')
+        """unauthorized"""
+        response = self.client.post(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        """simple user"""
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token_user.key)
+
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        response = self.client.post(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        """admin user"""
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token_admin.key)
+
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), UserProfile.objects.count())
+
+        response = self.client.post(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+    #
+    # def test_user_detail_view(self):
+    #     """
+    #     ALL: requires authentication
+    #     GET: returns user by userprofile id
+    #     POST: method not allowed
+    #     """
+    #     url = reverse('users:detail')
+    #
+    #     response = self.client.post(url, format='json')
+    #     self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+    #
+    #     self.assertEqual(User.objects.count(), 1)
+    #     self.assertEqual(UserProfile.objects.count(), 1)
+    #
+    #     user = User.objects.get()
+    #
+    #     self.assertEqual(user.username, 'name')
+    #     self.assertEqual(user.email, 'tt@tt.ru')
+    #
+    #     self.assertEqual(UserProfile.objects.get().user, user)
+    #
+    #     response = self.client.get(url, format='json')
+    #     self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
