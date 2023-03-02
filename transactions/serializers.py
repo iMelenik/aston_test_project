@@ -16,6 +16,8 @@ class TransactionSerializer(serializers.ModelSerializer):
         read_only_fields = ['status']
 
     def validate(self, data):
+        if data.get('transfer_amount') <= 0:
+            raise serializers.ValidationError("Transfer amount can't be less or equal zero.")
         sender = data.get('sender')
         receiver = data.get('receiver')
         self.same_sender_receiver_validator(sender, receiver)

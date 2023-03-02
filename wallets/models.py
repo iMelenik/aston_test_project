@@ -34,7 +34,7 @@ class Wallet(models.Model):
         return f"{self.name} ({self.currency})"
 
     def __repr__(self):
-        return f"Кошелек: {self.name}, тип: {self.type}, валюта: {self.currency}, баланс: {self.currency}."
+        return f"Кошелек: {self.name}, тип: {self.type}, валюта: {self.currency}, баланс: {self.balance}."
 
     def save(self, *args, **kwargs) -> None:
         """
