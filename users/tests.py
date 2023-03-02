@@ -148,27 +148,27 @@ class UserViewsTestCase(APITestCase):
 
         response = self.client.post(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
-    #
-    # def test_user_detail_view(self):
-    #     """
-    #     ALL: requires authentication
-    #     GET: returns user by userprofile id
-    #     POST: method not allowed
-    #     """
-    #     url = reverse('users:detail')
-    #
-    #     response = self.client.post(url, format='json')
-    #     self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
-    #
-    #     self.assertEqual(User.objects.count(), 1)
-    #     self.assertEqual(UserProfile.objects.count(), 1)
-    #
-    #     user = User.objects.get()
-    #
-    #     self.assertEqual(user.username, 'name')
-    #     self.assertEqual(user.email, 'tt@tt.ru')
-    #
-    #     self.assertEqual(UserProfile.objects.get().user, user)
-    #
-    #     response = self.client.get(url, format='json')
-    #     self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_user_detail_view(self):
+        """
+        ALL: requires authentication
+        GET: returns user by userprofile id
+        POST: method not allowed
+        """
+        url = reverse('users:detail', kwargs={'pk': '2'})
+
+        """unauthorized"""
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.post(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        """simple user"""
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token_user.key)
+
+        response = self.client.post(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['id'], 2)
