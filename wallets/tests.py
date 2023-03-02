@@ -68,7 +68,13 @@ class WalletViewsTestCase(APITestCase):
             email='tt2@tt.ru',
         )
         self.token_user2 = Token.objects.create(user=self.user2)
-        UserProfile.objects.create(user=self.user2)
+
+        self.wallet = Wallet.objects.create(
+            user=UserProfile.objects.create(user=self.user2),
+            type='Visa',
+            currency='USD',
+            balance=0
+        )
 
     def test_wallets_list_view(self):
         """
@@ -77,6 +83,7 @@ class WalletViewsTestCase(APITestCase):
         POST: create new wallet
         """
         url = reverse('wallets:list')
+
         """unauthorized"""
         response = self.client.post(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -105,31 +112,47 @@ class WalletViewsTestCase(APITestCase):
             }
             self.client.post(url, data, format='json')
 
-        self.assertEqual(Wallet.objects.count(), 5)
+        self.assertEqual(Wallet.objects.count(), 6)
 
-        """only owner permission check"""
+        """not owner user"""
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token_user2.key)
         response = self.client.get(url, format='json')
-        self.assertEqual(len(response.data), 0)
+        self.assertEqual(len(response.data), 1)
 
-    # def test_wallet_detail_view(self):
-    #     """
-    #     ALL: requires authentication, only owner
-    #     GET: returns specific wallet
-    #     POST: method not allowed
-    #     DELETE: delete wallet
-    #     """
-    #     url = reverse('wallets:detail')
-    #     """unauthorized"""
-    #     response = self.client.post(url, format='json')
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #     response = self.client.get(url, format='json')
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #
-    #     """simple user"""
-    #     self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token_user.key)
-    #
-    #     response = self.client.get(url, format='json')
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    #     response = self.client.post(url, format='json')
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    def test_wallet_detail_view(self):
+        """
+        ALL: requires authentication, only owner
+        GET: returns specific wallet
+        POST: method not allowed
+        DELETE: delete wallet
+        """
+        url = reverse('wallets:detail', kwargs={'name': self.wallet.name})
+
+        """unauthorized"""
+        response = self.client.post(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        """not owner user"""
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token_user1.key)
+
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        response = self.client.post(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        response = self.client.delete(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        """simple user"""
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token_user2.key)
+
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['name'], 'http://testserver/wallets/'+self.wallet.name+'/')
+        response = self.client.post(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        response = self.client.delete(url, format='json')
+        self.assertEqual(self.client.get(url, format='json').status_code, status.HTTP_404_NOT_FOUND)
+
+
