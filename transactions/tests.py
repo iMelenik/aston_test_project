@@ -1,3 +1,11 @@
 from django.test import TestCase
 
-# Create your tests here.
+
+
+"""
+1) Проверка создания Transaction
+2) Проверка одинаковой валюты
+3) Проверка расчета комиссии
+4) Проверка расчета новых значений sender и receiver
+5) Проверка установки статуса(?)
+"""
