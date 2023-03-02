@@ -17,6 +17,17 @@ class IsTransactionOwner(permissions.BasePermission):
         receiver_owner = obj.receiver.user
         return auth_user in (sender_owner, receiver_owner)
 
+    def has_permission(self, request, view):
+        if request.user.is_anonymous:
+            return False
+        auth_user = UserProfile.objects.get(user=request.user)
+        transaction_id = request.path.split('/')[-2]
+        try:
+            transaction = Transaction.objects.get(id=transaction_id)
+        except Transaction.DoesNotExist:
+            return False
+        return auth_user in (transaction.sender.user, transaction.receiver.user)
+
 
 class IsWalletOwner(permissions.BasePermission):
     """
@@ -29,6 +40,6 @@ class IsWalletOwner(permissions.BasePermission):
         wallet_name = request.path.split('/')[-2]
         try:
             wallet = Wallet.objects.get(name=wallet_name)
-        except:
+        except Wallet.DoesNotExist:
             return False
         return wallet.user == auth_user

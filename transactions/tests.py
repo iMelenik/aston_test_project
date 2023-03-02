@@ -169,7 +169,7 @@ class WalletViewsTestCase(APITestCase):
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         response = self.client.post(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         """simple user"""
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token_user1.key)
