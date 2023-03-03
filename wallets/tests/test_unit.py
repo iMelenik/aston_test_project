@@ -1,4 +1,6 @@
-from _decimal import Decimal
+from decimal import Decimal
+from time import sleep
+
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
@@ -9,16 +11,6 @@ from users.models import UserProfile
 from wallets.models import Wallet
 
 User = get_user_model()
-
-"""
-1) проверка создания Wallet
-2) проверка полей:
-    - уникальное имя
-    - modified обновляется
-    - автобаланс 3 евро/доллара или 100 рублей
-3) проверка 5 кошельков
-4) проверка удаления кошелька
-"""
 
 
 class WalletsUsageTestCase(APITestCase):
@@ -48,6 +40,7 @@ class WalletsUsageTestCase(APITestCase):
 
     def test_wallet_field_modified(self):
         self.assertEqual(self.wallet.created_on, self.wallet.modified_on)
+        sleep(0.00001)
         self.wallet.save()
         self.assertNotEqual(self.wallet.created_on, self.wallet.modified_on)
 
